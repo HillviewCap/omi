@@ -270,6 +270,38 @@ class TranscriptSocketServiceFactory {
     return _customSttSupportedCodecs.contains(codec);
   }
 
+  /// Create local-only transcription service (bypasses CompositeSocket)
+  /// Connects directly to PAI-Bridge WebSocket for local processing
+  static TranscriptSegmentSocketService createLocalOnly(
+    int sampleRate,
+    BleAudioCodec codec,
+    String language, {
+    String? source,
+  }) {
+    // Get the local bridge URL from env, with fallback to localhost
+    final bridgeUrl = Env.localBridgeUrl ?? 'ws://localhost:8000';
+
+    // Build WebSocket URL with parameters
+    final codecStr = codec.toString().split('.').last;
+    final params = '?language=$language&sample_rate=$sampleRate&codec=$codecStr';
+    final wsUrl = '$bridgeUrl/ws/transcribe$params';
+
+    debugPrint('[LocalOnly] Creating local-only socket: $wsUrl');
+
+    // Create direct socket to PAI-Bridge (no composite wrapper)
+    final socket = PureSocket(wsUrl);
+
+    return TranscriptSegmentSocketService.withSocket(
+      sampleRate,
+      codec,
+      language,
+      socket,
+      includeSpeechProfile: false,
+      source: source,
+      customSttMode: false,
+    );
+  }
+
   /// Create default Omi transcription service
   static TranscriptSegmentSocketService createDefault(
     int sampleRate,
@@ -313,6 +345,12 @@ class TranscriptSocketServiceFactory {
     CustomSttConfig config, {
     String? source,
   }) {
+    // Check for local-only mode first (bypasses all OMI backend)
+    if (Env.useLocalOnly) {
+      debugPrint('[STTFactory] Local-only mode enabled, connecting to PAI-Bridge');
+      return createLocalOnly(sampleRate, codec, language, source: source);
+    }
+
     if (!config.isEnabled) {
       return createDefault(sampleRate, codec, language, source: source);
     }

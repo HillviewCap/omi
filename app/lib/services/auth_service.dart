@@ -20,7 +20,26 @@ class AuthService {
 
   AuthService._internal();
 
-  bool isSignedIn() => FirebaseAuth.instance.currentUser != null && !FirebaseAuth.instance.currentUser!.isAnonymous;
+  /// Track if we're in local-only mode
+  bool _isLocalOnlyMode = false;
+  bool get isLocalOnlyMode => _isLocalOnlyMode;
+
+  bool isSignedIn() {
+    // In local-only mode, consider user as "signed in" if they have a local UID
+    if (_isLocalOnlyMode) {
+      return SharedPreferencesUtil().localDeviceUid.isNotEmpty;
+    }
+    return FirebaseAuth.instance.currentUser != null && !FirebaseAuth.instance.currentUser!.isAnonymous;
+  }
+
+  /// Initialize local-only authentication (bypasses Firebase)
+  /// Use this when running with USE_LOCAL_ONLY=true
+  Future<void> initializeLocalOnly() async {
+    _isLocalOnlyMode = true;
+    final localUid = SharedPreferencesUtil().getOrCreateLocalDeviceUid();
+    SharedPreferencesUtil().uid = localUid;
+    debugPrint('Local-only mode initialized with UID: $localUid');
+  }
 
   getFirebaseUser() {
     return FirebaseAuth.instance.currentUser;

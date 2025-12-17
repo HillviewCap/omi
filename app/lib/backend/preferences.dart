@@ -34,6 +34,26 @@ class SharedPreferencesUtil {
 
   String get uid => getString('uid');
 
+  /// Local device UID for local-only mode (bypasses Firebase auth)
+  set localDeviceUid(String value) => saveString('localDeviceUid', value);
+
+  String get localDeviceUid => getString('localDeviceUid');
+
+  /// Get or create a local device UID for local-only mode
+  /// Returns existing UID if available, otherwise generates a new UUID
+  String getOrCreateLocalDeviceUid() {
+    var existingUid = localDeviceUid;
+    if (existingUid.isNotEmpty) {
+      return existingUid;
+    }
+    // Generate a new UUID-like string
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = (timestamp * 1000).toRadixString(36);
+    final newUid = 'local-$random-${timestamp.toRadixString(16)}';
+    localDeviceUid = newUid;
+    return newUid;
+  }
+
   //-------------------------------- Device ----------------------------------//
 
   bool? get hasOmiDevice => _preferences?.getBool('hasOmiDevice');

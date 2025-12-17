@@ -66,11 +66,33 @@ Future<Map<String, String>> buildHeaders({
   return headers;
 }
 
+/// Check if URL requires authentication
+/// Returns false for local URLs (PAI-Bridge) to bypass Firebase auth
 bool _isRequiredAuthCheck(String url) {
+  // Skip auth for local-only mode URLs
+  if (_isLocalUrl(url)) {
+    return false;
+  }
   if (url.contains(Env.apiBaseUrl!)) {
     return true;
   }
   return false;
+}
+
+/// Check if URL is a local/PAI-Bridge URL (no auth needed)
+bool _isLocalUrl(String url) {
+  // Check for local-only mode bridge URL
+  if (Env.useLocalOnly && Env.localBridgeUrl != null) {
+    if (url.contains(Env.localBridgeUrl!)) {
+      return true;
+    }
+  }
+  // Check for common local URL patterns
+  return url.contains('localhost') ||
+      url.contains('127.0.0.1') ||
+      url.contains('100.') ||  // Tailscale IPs
+      url.contains('192.168.') ||
+      url.contains('10.0.');
 }
 
 Future<http.StreamedResponse> makeRawApiCall({

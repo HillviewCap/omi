@@ -31,6 +31,12 @@ abstract class Env {
   static bool get useWebAuth => _instance.useWebAuth ?? false;
 
   static bool get useAuthCustomToken => _instance.useAuthCustomToken ?? false;
+
+  /// Enable local-only mode: bypass OMI backend, connect directly to PAI-Bridge
+  static bool get useLocalOnly => _instance.useLocalOnly ?? false;
+
+  /// PAI-Bridge WebSocket URL for local-only mode
+  static String? get localBridgeUrl => _instance.localBridgeUrl;
 }
 
 abstract class EnvFields {
@@ -57,4 +63,8 @@ abstract class EnvFields {
   bool? get useWebAuth;
 
   bool? get useAuthCustomToken;
+
+  bool? get useLocalOnly;
+
+  String? get localBridgeUrl;
 }
