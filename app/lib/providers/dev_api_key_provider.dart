@@ -35,10 +35,8 @@ class DevApiKeyProvider with ChangeNotifier {
     DevApiKeyCreated? newKey;
     try {
       newKey = await DevApi.createDevApiKey(name);
-      if (newKey != null) {
-        // Add the new key to the top of the list, as the API returns keys sorted by creation date.
-        _keys.insert(0, newKey);
-      }
+      // Add the new key to the top of the list, as the API returns keys sorted by creation date.
+      _keys.insert(0, newKey);
     } catch (e) {
       _error = e.toString();
     } finally {

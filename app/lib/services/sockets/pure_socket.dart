@@ -61,6 +61,7 @@ class PureSocket implements IPureSocket {
   }
 
   PureSocketStatus _status = PureSocketStatus.notConnected;
+  @override
   PureSocketStatus get status => _status;
 
   IPureSocketListener? _listener;
@@ -75,6 +76,7 @@ class PureSocket implements IPureSocket {
     });
   }
 
+  @override
   void setListener(IPureSocketListener listener) {
     _listener = listener;
   }
@@ -93,7 +95,7 @@ class PureSocket implements IPureSocket {
       return false;
     }
 
-    debugPrint("request wss ${url}");
+    debugPrint("request wss $url");
     final headers = await buildHeaders(requireAuthCheck: true);
 
     _channel = IOWebSocketChannel.connect(
@@ -186,6 +188,7 @@ class PureSocket implements IPureSocket {
     _connectionStateListener?.cancel();
   }
 
+  @override
   Future stop() async {
     _stopped = true; // Prevent any further reconnect attempts
     DebugLogManager.logEvent('pure_socket_stopping', {

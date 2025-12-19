@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:omi/backend/schema/bt_device/bt_device.dart';
 import 'package:omi/services/sockets/pure_socket.dart';
 import 'package:omi/services/custom_stt_log_service.dart';
 import 'package:omi/services/connectivity_service.dart';
@@ -70,7 +69,7 @@ class GeminiStreamingSttSocket implements IPureSocket {
   StreamSubscription<bool>? _connectionStateListener;
   bool _isConnected = ConnectivityService().isConnected;
   Timer? _internetLostDelayTimer;
-  bool _stopped = false;  // Prevents reconnects after stop() is called
+  bool _stopped = false; // Prevents reconnects after stop() is called
 
   WebSocketChannel? _channel;
 
@@ -391,7 +390,7 @@ class GeminiStreamingSttSocket implements IPureSocket {
 
   @override
   Future stop() async {
-    _stopped = true;  // Prevent any further reconnect attempts
+    _stopped = true; // Prevent any further reconnect attempts
     DebugLogManager.logEvent('gemini_streaming_stopping', {});
     await disconnect();
     await _cleanUp();
@@ -450,13 +449,13 @@ class GeminiStreamingSttSocket implements IPureSocket {
 
     int waitInMilliseconds = pow(multiplier, _retries).toInt() * initialBackoffTimeMs;
     await Future.delayed(Duration(milliseconds: waitInMilliseconds));
-    
+
     // Double-check stopped flag after delay
     if (_stopped) {
       CustomSttLogService.instance.info('GeminiStreaming', 'Reconnect aborted after delay - socket was stopped');
       return;
     }
-    
+
     _retries++;
     if (_retries > maxRetries) {
       CustomSttLogService.instance.error('GeminiStreaming', 'Max retries reached');
@@ -500,7 +499,7 @@ class PureStreamingSttSocket implements IPureSocket {
   bool _isConnected = ConnectivityService().isConnected;
   Timer? _internetLostDelayTimer;
   Timer? _keepAliveTimer;
-  bool _stopped = false;  // Prevents reconnects after stop() is called
+  bool _stopped = false; // Prevents reconnects after stop() is called
 
   WebSocketChannel? _channel;
 
@@ -792,7 +791,7 @@ class PureStreamingSttSocket implements IPureSocket {
 
   @override
   Future stop() async {
-    _stopped = true;  // Prevent any further reconnect attempts
+    _stopped = true; // Prevent any further reconnect attempts
     DebugLogManager.logEvent('streaming_stt_stopping', {
       'service_id': config.serviceId,
     });
@@ -857,13 +856,13 @@ class PureStreamingSttSocket implements IPureSocket {
 
     int waitInMilliseconds = pow(multiplier, _retries).toInt() * initialBackoffTimeMs;
     await Future.delayed(Duration(milliseconds: waitInMilliseconds));
-    
+
     // Double-check stopped flag after delay
     if (_stopped) {
       CustomSttLogService.instance.info(config.serviceId, 'Reconnect aborted after delay - socket was stopped');
       return;
     }
-    
+
     _retries++;
     if (_retries > maxRetries) {
       CustomSttLogService.instance.error(config.serviceId, 'Max retries reached');

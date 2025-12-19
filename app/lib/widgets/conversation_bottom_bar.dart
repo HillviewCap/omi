@@ -327,10 +327,10 @@ class ConversationBottomBar extends StatelessWidget {
     const double size = 28;
 
     if (isLoading) {
-      return SizedBox(
+      return const SizedBox(
         width: size,
         height: size,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
         ),
@@ -387,10 +387,10 @@ class ConversationBottomBar extends StatelessWidget {
           ),
         );
       },
-      placeholder: (context, url) => SizedBox(
+      placeholder: (context, url) => const SizedBox(
         width: size,
         height: size,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
         ),

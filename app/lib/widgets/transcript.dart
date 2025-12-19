@@ -67,7 +67,7 @@ class _TranscriptWidgetState extends State<TranscriptWidget> {
 
   // Search result tracking
   List<GlobalKey> _segmentKeys = [];
-  List<GlobalKey> _matchKeys = [];
+  final List<GlobalKey> _matchKeys = [];
   int _previousSearchResultIndex = -1;
 
   // Define distinct muted colors for different speakers
@@ -192,10 +192,10 @@ class _TranscriptWidgetState extends State<TranscriptWidget> {
     }
 
     // Check if user manually scrolled up from the bottom
-    if (_scrollController.hasClients) {
+    if (_scrollController.hasClients && _scrollController.position.hasContentDimensions) {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.offset;
-      final threshold = 100.0;
+      const threshold = 100.0;
       final distanceFromBottom = maxScroll - currentScroll;
 
       if (distanceFromBottom > threshold) {
@@ -208,6 +208,10 @@ class _TranscriptWidgetState extends State<TranscriptWidget> {
 
   void _scrollToBottomGently() {
     if (!_scrollController.hasClients) {
+      return;
+    }
+
+    if (!_scrollController.position.hasContentDimensions) {
       return;
     }
 
@@ -305,9 +309,13 @@ class _TranscriptWidgetState extends State<TranscriptWidget> {
         return;
       }
 
-      final itemHeight = 80.0;
+      const itemHeight = 80.0;
       final headerHeight = widget.topMargin ? 32.0 : 0.0;
       final targetOffset = headerHeight + (targetSegmentIndex * itemHeight);
+
+      if (!_scrollController.position.hasContentDimensions) {
+        return;
+      }
 
       _isAutoScrolling = true;
       _scrollController
@@ -561,7 +569,7 @@ class _TranscriptWidgetState extends State<TranscriptWidget> {
                                           ? 6
                                           : 18),
                                   topRight: Radius.circular(isUser ? 18 : 18),
-                                  bottomLeft: Radius.circular(18),
+                                  bottomLeft: const Radius.circular(18),
                                   bottomRight: Radius.circular(isUser ? 6 : 18),
                                 ),
                                 boxShadow: [

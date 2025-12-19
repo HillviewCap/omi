@@ -55,4 +55,12 @@ final class ProdEnv implements EnvFields {
   @override
   @EnviedField(varName: 'USE_AUTH_CUSTOM_TOKEN', obfuscate: false, defaultValue: false)
   final bool? useAuthCustomToken = _ProdEnv.useAuthCustomToken;
+
+  @override
+  @EnviedField(varName: 'USE_LOCAL_ONLY', obfuscate: false, defaultValue: false)
+  final bool? useLocalOnly = _ProdEnv.useLocalOnly;
+
+  @override
+  @EnviedField(varName: 'LOCAL_BRIDGE_URL', obfuscate: false)
+  final String? localBridgeUrl = _ProdEnv.localBridgeUrl;
 }
