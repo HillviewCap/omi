@@ -199,5 +199,9 @@ app/.fvm/
 app/android/.kotlin/
 app/setup/prebuilt/google-services.json
 google-services.json
-app/setup/prebuilt/google-services.json
-app/setup/prebuilt/google-services.json
+
+# Firebase/Google credentials in prebuilt directory
+app/setup/prebuilt/firebase_options.dart
+app/setup/prebuilt/GoogleService-Info.plist
+app/setup/prebuilt/debug.keystore
+app/setup/prebuilt/key.properties
