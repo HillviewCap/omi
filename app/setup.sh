@@ -59,7 +59,7 @@ echo "- bash setup.sh macos"
 echo ""
 
 
-API_BASE_URL=https://api.omiapi.com/
+API_BASE_URL=http://100.91.226.93:8000/
 
 ######################################
 # Generate device suffix from hostname

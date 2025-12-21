@@ -52,6 +52,7 @@ class AuthService {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn(
       scopes: ['profile', 'email'],
+      serverClientId: '1032170124104-vkgtlmg9kcld3nev72uvq55o69jvlkns.apps.googleusercontent.com',
     ).signIn();
     debugPrint('Google User: $googleUser');
 

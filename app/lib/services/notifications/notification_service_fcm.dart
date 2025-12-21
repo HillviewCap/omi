@@ -157,6 +157,7 @@ class _FCMNotificationService implements NotificationInterface {
     }
 
     String? token = await _firebaseMessaging.getToken();
+    debugPrint('FCM Token: $token');
     await saveFcmToken(token);
     _firebaseMessaging.onTokenRefresh.listen(saveFcmToken);
   }
