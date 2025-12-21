@@ -945,6 +945,30 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Ticker
                         ),
                       ),
                       const SizedBox(width: 8),
+                      // Short conversations filter button
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: convoProvider.showShortConversations
+                              ? Colors.deepPurple.withValues(alpha: 0.5)
+                              : const Color(0xFF1F1F25),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            convoProvider.showShortConversations ? FontAwesomeIcons.solidClock : FontAwesomeIcons.clock,
+                            size: 16,
+                            color: convoProvider.showShortConversations ? Colors.deepPurple : Colors.white70,
+                          ),
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            convoProvider.toggleShortConversations();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                     ],
                   );
                 },

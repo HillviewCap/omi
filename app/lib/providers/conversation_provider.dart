@@ -165,6 +165,7 @@ class ConversationProvider extends ChangeNotifier {
   void toggleShortConversations() {
     showShortConversations = !showShortConversations;
     groupConversationsByDate();
+    notifyListeners();
   }
 
   void toggleStarredFilter() {

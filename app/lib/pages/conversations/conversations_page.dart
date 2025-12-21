@@ -184,6 +184,7 @@ class _ConversationsPageState extends State<ConversationsPage> with AutomaticKee
                     padding: const EdgeInsets.only(top: 32.0),
                     child: EmptyConversationsWidget(
                       isStarredFilterActive: convoProvider.showStarredOnly,
+                      isShortConversationsFilterActive: convoProvider.showShortConversations,
                     ),
                   ),
                 ),
