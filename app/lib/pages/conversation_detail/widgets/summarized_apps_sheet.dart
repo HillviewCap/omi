@@ -725,9 +725,10 @@ class _AppListItemState extends State<_AppListItem> {
   }
 
   Widget _buildTrailingWidget() {
-    // Check if this app is currently being processed
+    // Check if this app is currently being processed for THIS conversation
     final isProcessing = widget.provider != null &&
         widget.provider!.loadingReprocessConversation &&
+        widget.provider!.reprocessConversationId == widget.provider!.conversation.id &&
         widget.provider!.selectedAppForReprocessing?.id == widget.app.id;
 
     if (widget.isSelected) {
