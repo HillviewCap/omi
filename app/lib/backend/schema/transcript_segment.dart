@@ -55,7 +55,21 @@ class TranscriptSegment {
     this.speechProfileProcessed = true,
     this.sttProvider,
   }) {
-    speakerId = speaker != null ? int.parse(speaker!.split('_')[1]) : 0;
+    speakerId = _parseSpeakerId(speaker);
+  }
+
+  /// Parse speaker ID from speaker string (e.g., "SPEAKER_0" -> 0)
+  /// Handles various formats: "SPEAKER_0", "0", null, or malformed strings
+  static int _parseSpeakerId(String? speaker) {
+    if (speaker == null || speaker.isEmpty) return 0;
+
+    final parts = speaker.split('_');
+    if (parts.length >= 2) {
+      // Format: "SPEAKER_0" or similar
+      return int.tryParse(parts[1]) ?? 0;
+    }
+    // Fallback: try parsing the whole string as a number
+    return int.tryParse(speaker) ?? 0;
   }
 
   @override
