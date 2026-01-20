@@ -289,10 +289,11 @@ class ConversationProvider extends ChangeNotifier {
         }
       }
 
-      // Filter out short conversations (< 2 minutes) unless explicitly showing them
+      // Filter out short conversations (< 1 minute) unless explicitly showing them
+      // Note: durationSeconds == 0 means missing data, not a short conversation
       if (!showShortConversations) {
         final durationSeconds = convo.getDurationInSeconds();
-        if (durationSeconds < 60) {
+        if (durationSeconds > 0 && durationSeconds < 60) {
           return false;
         }
       }
