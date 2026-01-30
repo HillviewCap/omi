@@ -668,6 +668,12 @@ class ChatPageState extends State<ChatPage> with AutomaticKeepAliveClientMixin, 
       return;
     }
 
+    // save chat as conversation
+    if (val == 'save_conversation') {
+      _showSaveChatDialog();
+      return;
+    }
+
     // enable apps - navigate back to home and show apps page
     if (val == 'enable') {
       _navigateToAppsPage();
@@ -692,6 +698,38 @@ class ChatPageState extends State<ChatPage> with AutomaticKeepAliveClientMixin, 
             Navigator.of(context).pop();
           }
         }, "Clear Chat?", "Are you sure you want to clear the chat? This action cannot be undone.");
+      },
+    );
+  }
+
+  void _showSaveChatDialog() {
+    if (!mounted) return;
+
+    final messageProvider = context.read<MessageProvider>();
+    if (messageProvider.messages.isEmpty) {
+      AppSnackbar.showSnackbarError('No messages to save');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return getDialog(context, () {
+          Navigator.of(context).pop();
+        }, () async {
+          Navigator.of(context).pop();
+          if (mounted) {
+            AppSnackbar.showSnackbar('Saving chat as conversation...');
+            final success = await messageProvider.saveCurrentChatAsConversation();
+            if (mounted) {
+              if (success) {
+                AppSnackbar.showSnackbar('Chat saved as conversation!');
+              } else {
+                AppSnackbar.showSnackbarError('Failed to save chat');
+              }
+            }
+          }
+        }, "Save as Conversation?", "This will save the current chat as a conversation with full analysis including summary, action items, and memories.");
       },
     );
   }
@@ -857,6 +895,16 @@ class ChatPageState extends State<ChatPage> with AutomaticKeepAliveClientMixin, 
                                 controller.reverse().then((_) {
                                   entry.remove();
                                   _handleAppSelection('clear_chat', appProvider);
+                                });
+                              },
+                            ),
+                            PullDownMenuItem(
+                              title: 'Save as Conversation',
+                              iconWidget: const Icon(Icons.save_outlined, color: Colors.white, size: 16),
+                              onTap: () {
+                                controller.reverse().then((_) {
+                                  entry.remove();
+                                  _handleAppSelection('save_conversation', appProvider);
                                 });
                               },
                             ),

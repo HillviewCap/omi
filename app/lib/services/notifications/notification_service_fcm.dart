@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:http/http.dart' as http;
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -160,6 +161,11 @@ class _FCMNotificationService implements NotificationInterface {
     debugPrint('FCM Token: $token');
     await saveFcmToken(token);
     _firebaseMessaging.onTokenRefresh.listen(saveFcmToken);
+
+    // Also register token with Tom (local PAI backend)
+    if (token != null) {
+      _registerTokenWithTom(token);
+    }
   }
 
   @override
@@ -246,6 +252,33 @@ class _FCMNotificationService implements NotificationInterface {
       Map<String, String?>? payload}) async {
     final id = Random().nextInt(10000);
     showNotification(id: id, title: noti.title!, body: noti.body!, layout: layout, payload: payload);
+  }
+
+  /// Register FCM token with Tom (local PAI backend) for push notifications
+  Future<void> _registerTokenWithTom(String token) async {
+    // Tom backend URL - using Tailscale IP
+    const tomBaseUrl = 'http://100.91.226.93:8000';
+
+    try {
+      // Get timezone for the request
+      final timeZone = await getTimeZone();
+
+      // Use OMI-compatible endpoint format
+      final response = await http.post(
+        Uri.parse('$tomBaseUrl/v1/users/fcm-token'),
+        headers: {'Content-Type': 'application/json'},
+        body: '{"fcm_token": "$token", "time_zone": "$timeZone"}',
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('FCM token registered with Tom successfully');
+      } else {
+        debugPrint('Failed to register FCM token with Tom: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Silently fail - Tom might not be running
+      debugPrint('Could not register FCM token with Tom: $e');
+    }
   }
 }
 

@@ -185,3 +185,35 @@ Future<String> transcribeVoiceMessage(File audioFile) async {
     throw Exception('Error transcribing voice message: $e');
   }
 }
+
+Future<Map<String, dynamic>?> saveChatAsConversation({String? appId, String? title}) async {
+  // Build query params
+  var queryParams = <String>[];
+  if (appId != null && appId.isNotEmpty && appId != 'null' && appId != 'no_selected') {
+    queryParams.add('app_id=$appId');
+  }
+  if (title != null && title.isNotEmpty) {
+    queryParams.add('title=${Uri.encodeComponent(title)}');
+  }
+  var queryString = queryParams.isNotEmpty ? '?${queryParams.join('&')}' : '';
+
+  var response = await makeApiCall(
+    url: '${Env.apiBaseUrl}v1/conversations/from-chat$queryString',
+    headers: {},
+    method: 'POST',
+    body: '',
+  );
+
+  if (response == null) {
+    debugPrint('saveChatAsConversation: null response');
+    return null;
+  }
+
+  if (response.statusCode == 200) {
+    debugPrint('saveChatAsConversation: success');
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  } else {
+    debugPrint('saveChatAsConversation failed: ${response.statusCode} ${response.body}');
+    return null;
+  }
+}

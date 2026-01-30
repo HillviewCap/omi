@@ -566,6 +566,40 @@ class MessageProvider extends ChangeNotifier {
     return appProvider?.apps.firstWhereOrNull((p) => p.id == appId);
   }
 
+  bool isSavingChat = false;
+
+  Future<bool> saveCurrentChatAsConversation({String? title}) async {
+    if (isSavingChat) return false;
+
+    isSavingChat = true;
+    notifyListeners();
+
+    try {
+      var currentAppId = appProvider?.selectedChatAppId;
+      if (currentAppId == 'no_selected') {
+        currentAppId = null;
+      }
+
+      var result = await saveChatAsConversation(appId: currentAppId, title: title);
+
+      isSavingChat = false;
+      notifyListeners();
+
+      if (result != null) {
+        debugPrint('Chat saved as conversation: ${result['id']}');
+        return true;
+      } else {
+        debugPrint('Failed to save chat as conversation');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error saving chat as conversation: $e');
+      isSavingChat = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> _handleAskAIMethodCall(MethodCall call) async {
     if (!PlatformService.isDesktop) {
       return;
