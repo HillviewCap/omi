@@ -16,7 +16,8 @@ import 'package:omi/providers/app_provider.dart';
 import 'package:omi/providers/conversation_provider.dart';
 import 'package:omi/utils/analytics/mixpanel.dart';
 
-class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixin {
+class ConversationDetailProvider extends ChangeNotifier
+    with MessageNotifierMixin {
   AppProvider? appProvider;
   ConversationProvider? conversationProvider;
 
@@ -106,7 +107,10 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
     notifyListeners();
   }
 
-  void setProviders(AppProvider provider, ConversationProvider conversationProvider) {
+  void setProviders(
+    AppProvider provider,
+    ConversationProvider conversationProvider,
+  ) {
     this.conversationProvider = conversationProvider;
     appProvider = provider;
     notifyListeners();
@@ -150,6 +154,14 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
         _cachedConversation = conv;
       }
     }
+
+    // Clear processing state when switching to a different conversation
+    if (conversationId != reprocessConversationId) {
+      reprocessConversationId = '';
+      selectedAppForReprocessing = null;
+      loadingReprocessConversation = false;
+    }
+
     appResponseExpanded = List.filled(conversation.appResults.length, false);
     notifyListeners();
   }
@@ -173,7 +185,10 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   }
 
   void undoDeleteActionItem(int idx) {
-    conversation.structured.actionItems.insert(idx, deletedActionItems.removeLast());
+    conversation.structured.actionItems.insert(
+      idx,
+      deletedActionItems.removeLast(),
+    );
     notifyListeners();
   }
 
@@ -225,7 +240,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
       }
     });
 
-    canDisplaySeconds = TranscriptSegment.canDisplaySeconds(conversation.transcriptSegments);
+    canDisplaySeconds = TranscriptSegment.canDisplaySeconds(
+      conversation.transcriptSegments,
+    );
 
     loadPreferredSummarizationApp();
 
@@ -239,7 +256,10 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
           _ratingTimer = Timer(const Duration(seconds: 15), () {
             // Only notify if the timer hasn't been cancelled (provider still alive)
             if (_ratingTimer?.isActive ?? false) {
-              setConversationSummaryRating(conversation.id, -1); // set -1 to indicate is was shown
+              setConversationSummaryRating(
+                conversation.id,
+                -1,
+              ); // set -1 to indicate is was shown
               showRatingUI = true;
               notifyListeners();
             }
@@ -257,7 +277,10 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
     updateReprocessConversationLoadingState(true);
     updateReprocessConversationId(conversation.id);
     try {
-      var updatedConversation = await reProcessConversationServer(conversation.id, appId: appId);
+      var updatedConversation = await reProcessConversationServer(
+        conversation.id,
+        appId: appId,
+      );
       MixpanelManager().reProcessConversation(conversation);
       updateReprocessConversationLoadingState(false);
       updateReprocessConversationId('');
@@ -276,7 +299,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
 
       // Check if the summarized app is in the apps list
       AppResponse? summaryApp = getSummarizedApp();
-      if (summaryApp != null && summaryApp.appId != null && appProvider != null) {
+      if (summaryApp != null &&
+          summaryApp.appId != null &&
+          appProvider != null) {
         String appId = summaryApp.appId!;
         bool appExists = appProvider!.apps.any((app) => app.id == appId);
         if (!appExists) {
@@ -288,11 +313,18 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
       return true;
     } catch (err, stacktrace) {
       print(err);
-      var conversationReporting = MixpanelManager().getConversationEventProperties(conversation);
-      await PlatformManager.instance.crashReporter.reportCrash(err, stacktrace, userAttributes: {
-        'conversation_transcript_length': conversationReporting['transcript_length'].toString(),
-        'conversation_transcript_word_count': conversationReporting['transcript_word_count'].toString(),
-      });
+      var conversationReporting = MixpanelManager()
+          .getConversationEventProperties(conversation);
+      await PlatformManager.instance.crashReporter.reportCrash(
+        err,
+        stacktrace,
+        userAttributes: {
+          'conversation_transcript_length':
+              conversationReporting['transcript_length'].toString(),
+          'conversation_transcript_word_count':
+              conversationReporting['transcript_word_count'].toString(),
+        },
+      );
       notifyError('REPROCESS_FAILED');
       updateReprocessConversationLoadingState(false);
       updateReprocessConversationId('');
@@ -301,8 +333,13 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
     }
   }
 
-  void unassignConversationTranscriptSegment(String conversationId, String segmentId) {
-    final segmentIdx = conversation.transcriptSegments.indexWhere((s) => s.id == segmentId);
+  void unassignConversationTranscriptSegment(
+    String conversationId,
+    String segmentId,
+  ) {
+    final segmentIdx = conversation.transcriptSegments.indexWhere(
+      (s) => s.id == segmentId,
+    );
     if (segmentIdx == -1) return;
     conversation.transcriptSegments[segmentIdx].isUser = false;
     conversation.transcriptSegments[segmentIdx].personId = null;
@@ -318,10 +355,7 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
     }
     // If no appResults but we have structured overview, create a fake AppResponse
     if (conversation.structured.overview.isNotEmpty) {
-      return AppResponse(
-        conversation.structured.overview,
-        appId: null,
-      );
+      return AppResponse(conversation.structured.overview, appId: null);
     }
     return null;
   }
@@ -337,7 +371,12 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
     if (suggestedAppIds.isEmpty || appProvider == null) return [];
 
     return appProvider!.apps
-        .where((app) => suggestedAppIds.contains(app.id) && app.worksWithMemories() && app.enabled)
+        .where(
+          (app) =>
+              suggestedAppIds.contains(app.id) &&
+              app.worksWithMemories() &&
+              app.enabled,
+        )
         .toList();
   }
 
@@ -355,7 +394,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   Future<List<App>> getEnabledConversationAppsFromAPI() async {
     try {
       final result = await retrieveAppsSearch(installedApps: true, limit: 100);
-      return result.apps.where((app) => app.worksWithMemories() && app.enabled).toList();
+      return result.apps
+          .where((app) => app.worksWithMemories() && app.enabled)
+          .toList();
     } catch (e) {
       debugPrint('Error fetching enabled conversation apps: $e');
       return [];
@@ -369,8 +410,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
       final apps = await getEnabledConversationAppsFromAPI();
 
       // Preserve locally added apps that aren't in the API response yet
-      final locallyAddedApps =
-          _cachedEnabledConversationApps.where((app) => _locallyAddedAppIds.contains(app.id)).toList();
+      final locallyAddedApps = _cachedEnabledConversationApps
+          .where((app) => _locallyAddedAppIds.contains(app.id))
+          .toList();
 
       _cachedEnabledConversationApps.clear();
       _cachedEnabledConversationApps.addAll(apps);
@@ -407,10 +449,14 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   App? findAppById(String? appId) {
     if (appId == null) return null;
 
-    final enabledApp = _cachedEnabledConversationApps.firstWhereOrNull((app) => app.id == appId);
+    final enabledApp = _cachedEnabledConversationApps.firstWhereOrNull(
+      (app) => app.id == appId,
+    );
     if (enabledApp != null) return enabledApp;
 
-    final suggestedApp = _cachedSuggestedApps.firstWhereOrNull((app) => app.id == appId);
+    final suggestedApp = _cachedSuggestedApps.firstWhereOrNull(
+      (app) => app.id == appId,
+    );
     if (suggestedApp != null) return suggestedApp;
 
     return null;
@@ -431,7 +477,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
         app.enabled = true;
 
         // Add to cached enabled apps if not already there
-        final existingIndex = _cachedEnabledConversationApps.indexWhere((a) => a.id == app.id);
+        final existingIndex = _cachedEnabledConversationApps.indexWhere(
+          (a) => a.id == app.id,
+        );
         if (existingIndex == -1) {
           _cachedEnabledConversationApps.add(app);
         } else {
@@ -451,7 +499,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   /// Adds an app to the cached enabled conversation apps list
   /// Used when a new app is created and installed from the quick template creator
   void addToEnabledConversationApps(App app) {
-    final existingIndex = _cachedEnabledConversationApps.indexWhere((a) => a.id == app.id);
+    final existingIndex = _cachedEnabledConversationApps.indexWhere(
+      (a) => a.id == app.id,
+    );
     if (existingIndex == -1) {
       _cachedEnabledConversationApps.add(app);
     } else {
@@ -470,7 +520,9 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   /// Checks if a suggested app is available/enabled for the user
   bool isSuggestedAppAvailable(String appId) {
     if (appProvider == null) return false;
-    return appProvider!.apps.any((app) => app.id == appId && app.worksWithMemories() && app.enabled);
+    return appProvider!.apps.any(
+      (app) => app.id == appId && app.worksWithMemories() && app.enabled,
+    );
   }
 
   void setCachedConversation(ServerConversation conversation) {
@@ -491,7 +543,8 @@ class ConversationDetailProvider extends ChangeNotifier with MessageNotifierMixi
   }
 
   void loadPreferredSummarizationApp() {
-    _preferredSummarizationAppId = SharedPreferencesUtil().preferredSummarizationAppId;
+    _preferredSummarizationAppId =
+        SharedPreferencesUtil().preferredSummarizationAppId;
   }
 
   void trackLastUsedSummarizationApp(String appId) {
