@@ -160,17 +160,21 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> with Ti
       });
     });
 
+    // IMPORTANT: Update provider state SYNCHRONOUSLY before the first frame builds.
+    // This prevents the spinner bug where stale state (from a previous conversation's
+    // reprocess operation) would briefly show on the new conversation.
+    var provider = Provider.of<ConversationDetailProvider>(context, listen: false);
+    var conversationProvider = Provider.of<ConversationProvider>(context, listen: false);
+
+    // Ensure the provider has the conversation data from the widget parameter
+    provider.setCachedConversation(widget.conversation);
+
+    // Find the proper date and index for this conversation in the grouped conversations
+    var (date, _) = conversationProvider.getConversationDateAndIndex(widget.conversation);
+    provider.updateConversation(widget.conversation.id, date);
+
+    // Async initialization runs after the frame builds
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      var provider = Provider.of<ConversationDetailProvider>(context, listen: false);
-      var conversationProvider = Provider.of<ConversationProvider>(context, listen: false);
-
-      // Ensure the provider has the conversation data from the widget parameter
-      provider.setCachedConversation(widget.conversation);
-
-      // Find the proper date and index for this conversation in the grouped conversations
-      var (date, index) = conversationProvider.getConversationDateAndIndex(widget.conversation);
-      provider.updateConversation(widget.conversation.id, date);
-
       await provider.initConversation();
       if (provider.conversation.appResults.isEmpty) {
         final date = provider.selectedDate;
