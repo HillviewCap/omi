@@ -59,6 +59,16 @@ Future<Map<String, String>> buildHeaders({
     ...fromHeaders,
   };
 
+  // PAI-Bridge auth (TOM Story 1.2 / caveat C1): attach X-API-Key UNCONDITIONALLY
+  // when configured. The local-mode (_isLocalUrl) path skips requireAuthCheck, so
+  // gating this on requireAuthCheck would leave the Tailscale/private-range bridge
+  // unauthenticated. Sending an extra X-API-Key to the OMI cloud is harmless (an
+  // unknown header is ignored); the bridge is the only consumer. Empty/null key =>
+  // no header (degrade-safe parity with an un-keyed bridge).
+  if (Env.localBridgeApiKey != null && Env.localBridgeApiKey!.isNotEmpty) {
+    headers['X-API-Key'] = Env.localBridgeApiKey!;
+  }
+
   if (requireAuthCheck) {
     headers['Authorization'] = await getAuthHeader();
   }

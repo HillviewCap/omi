@@ -63,4 +63,8 @@ final class DevEnv implements EnvFields {
   @override
   @EnviedField(varName: 'LOCAL_BRIDGE_URL', obfuscate: false)
   final String? localBridgeUrl = _DevEnv.localBridgeUrl;
+
+  @override
+  @EnviedField(varName: 'LOCAL_BRIDGE_API_KEY', obfuscate: false)
+  final String? localBridgeApiKey = _DevEnv.localBridgeApiKey;
 }

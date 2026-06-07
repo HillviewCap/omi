@@ -37,6 +37,10 @@ abstract class Env {
 
   /// PAI-Bridge WebSocket URL for local-only mode
   static String? get localBridgeUrl => _instance.localBridgeUrl;
+
+  /// PAI-Bridge X-API-Key (TOM Story 1.2). Must match the bridge's BRIDGE_API_KEY
+  /// so the wearable/desktop capture authenticates over REST + WS in local mode.
+  static String? get localBridgeApiKey => _instance.localBridgeApiKey;
 }
 
 abstract class EnvFields {
@@ -67,4 +71,6 @@ abstract class EnvFields {
   bool? get useLocalOnly;
 
   String? get localBridgeUrl;
+
+  String? get localBridgeApiKey;
 }
