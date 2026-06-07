@@ -257,7 +257,7 @@ class _FCMNotificationService implements NotificationInterface {
   /// Register FCM token with Tom (local PAI backend) for push notifications
   Future<void> _registerTokenWithTom(String token) async {
     // Tom backend URL - using Tailscale IP
-    const tomBaseUrl = 'http://100.91.226.93:8000';
+    const tomBaseUrl = 'http://100.78.93.58:8000';
 
     try {
       // Get timezone for the request
